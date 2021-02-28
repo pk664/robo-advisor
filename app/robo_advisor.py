@@ -35,6 +35,27 @@ latest_day = dates[0]
 
 latest_close = tsd[latest_day]["4. close"]
 
+
+
+#max of all 100 day prices 
+high_prices = [ ]
+
+for date in dates: 
+    high_price = tsd[date]["2. high"]
+    high_prices.append(float(high_price))
+
+recent_high = max(high_prices)
+
+#min of all 100 day prices 
+
+low_prices = [ ]
+
+for date in dates: 
+    low_price = tsd[date]["3. low"]
+    low_prices.append(float(low_price))
+
+recent_low = min(low_prices)
+
 #
 # INFO OUTPUTS 
 #
@@ -48,8 +69,8 @@ print(f"REQUEST AT:", now.strftime("%Y-%m-%d %H:%M:%S"))
 print("-------------------------")
 print(f"LATEST DAY: {last_refreshed}")
 print(f"LATEST CLOSE: {to_usd(float(latest_close))}")
-print("RECENT HIGH: $101,000.00")
-print("RECENT LOW: $99,000.00")
+print(f"RECENT HIGH: {to_usd(float(recent_high))}")
+print(f"RECENT LOW: {to_usd(float(recent_low))}")
 print("-------------------------")
 print("RECOMMENDATION: BUY!")
 print("RECOMMENDATION REASON: TODO")
