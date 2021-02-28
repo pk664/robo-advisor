@@ -18,7 +18,7 @@ def to_usd(my_price):
 #
 
 # TODO: CAPTURE DATA IF USER INPUTS A NON VALID TICKER 
-# If ticker has more than 4 letters, if ticker has a number in it 
+# how to make it so that if the user inputs a ticker but that ticker doesnt exist
 # If ticker isnumeric but also has letters 
 
 
