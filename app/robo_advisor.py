@@ -18,26 +18,29 @@ def to_usd(my_price):
 #
 
 # TODO: CAPTURE DATA IF USER INPUTS A NON VALID TICKER 
-# how to make it so that if the user inputs a ticker but that ticker doesnt exist
-# If ticker isnumeric but also has letters 
+# TODO: line graph for stock price 
+# TODO: create a reason for recomendation 
+
+
+
+
+api_key = os.environ.get("ALPHAVANTAGE_API_KEY")
 
 
 while True: 
     symbol = input("Please input a stock or cryptocurrency ticker:")
     if symbol.isnumeric() == True: 
-        print("Oops, that's an invalid input. Please try again!")
+        print("Oops, that's an invalid input. Please enter a properly-formed stock symbol like 'MSFT'.")
     elif len(symbol) > 4: 
-        print("Oops, that's an invalid input. Please try again!")
+        print("Oops, that's an invalid input. Please enter a properly-formed stock symbol like 'MSFT'.")
+#    elif symbol not in parsed_response["Meta Data"]:
+#       print("Oops, that's an invalid input. Please enter a properly-formed stock symbol like 'MSFT'.")
     else: 
         break
 
-api_key = os.environ.get("ALPHAVANTAGE_API_KEY")
 
 request_url = f"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol={symbol}&apikey={api_key}"
-
-
 response = requests.get(request_url)
-
 parsed_response = json.loads(response.text)
 
 last_refreshed = parsed_response["Meta Data"]["3. Last Refreshed"]
@@ -85,6 +88,38 @@ with open(csv_file_path, "w") as csv_file:
             "volume": daily_prices["6. volume"]
         })
 
+#
+# RECOMMENDATION
+# 
+
+# If a stock price is 20% less than its recent low, then buy 
+# If not, then don't buy 
+
+
+#
+# LINE GRAPH OF STOCK PRICES OVER TIME 
+# This code was adapted from @joe297 on Plotly 
+
+#df = px.data.gapminder().query("country=='Canada'")
+#fig = px.line(df, x="date", y="price", title='{symbol} Stock Price')
+#fig.show()
+#
+#import plotly.plotly as py
+#from plotly.graph_objs import *
+#
+#stock_price = {
+#  "line": {
+#    "color": "rgba(31,119,180,1)", 
+#    "fillcolor": "rgba(31,119,180,1)"
+#  }, 
+#  "mode": "lines", 
+#  "name": "{symbol}", 
+#  "type": "scatter", 
+#  "x": [ ]
+#  "y": [ ]
+#  "xaxis": "x", 
+#  "yaxis": "y"
+#}
 
 print("-------------------------")
 print(f"SELECTED SYMBOL: {symbol}")
@@ -97,12 +132,19 @@ print(f"LATEST CLOSE: {to_usd(float(latest_close))}")
 print(f"RECENT HIGH: {to_usd(float(recent_high))}")
 print(f"RECENT LOW: {to_usd(float(recent_low))}")
 print("-------------------------")
-print("RECOMMENDATION: BUY!")
-print("RECOMMENDATION REASON: TODO")
+
+
+if float(latest_close) <= 0.9*float(recent_low): 
+    print("RECOMMENDATION: BUY")
+else: 
+    print("RECOMMENDATION: DON'T BUY")
+
+
+print("RECOMMENDATION REASON: The stock is not trading at less than 10 percent of its recent low. Now's not a great time to buy.")
 print("-------------------------")
 print(f"WRITING DATA TO CSV: {csv_file_path}...")
 print("-------------------------")
-print("HAPPY INVESTING!")
+print("Happy Investing!")
 print("-------------------------")
 
 
