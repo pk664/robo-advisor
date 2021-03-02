@@ -8,6 +8,8 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 now = datetime.now()
+import pandas as pd
+import seaborn as sns 
 
 def to_usd(my_price):
     return f"${my_price:,.2f}" 
@@ -17,11 +19,11 @@ def to_usd(my_price):
 # INFO INPUTS 
 #
 
+# This code was adapted from Prof Rossetti's screencast 
+
 # TODO: CAPTURE DATA IF USER INPUTS A NON VALID TICKER 
 # TODO: line graph for stock price 
 # TODO: create a reason for recomendation 
-
-
 
 
 api_key = os.environ.get("ALPHAVANTAGE_API_KEY")
@@ -33,8 +35,6 @@ while True:
         print("Oops, that's an invalid input. Please enter a properly-formed stock symbol like 'MSFT'.")
     elif len(symbol) > 4: 
         print("Oops, that's an invalid input. Please enter a properly-formed stock symbol like 'MSFT'.")
-#    elif symbol not in parsed_response["Meta Data"]:
-#       print("Oops, that's an invalid input. Please enter a properly-formed stock symbol like 'MSFT'.")
     else: 
         break
 
@@ -43,9 +43,18 @@ request_url = f"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJ
 response = requests.get(request_url)
 parsed_response = json.loads(response.text)
 
+# TODO
+#while True:
+#    if symbol not in parsed_response:
+#        print("Oops, invalid input.")
+#        break
+#    else: 
+#        break
+#
 last_refreshed = parsed_response["Meta Data"]["3. Last Refreshed"]
 
 tsd = parsed_response["Time Series (Daily)"]
+
 
 dates = list(tsd.keys()) # TODO: sort to ensure latest day is first 
 # especially if data structure changes later on. This assumes first day is on top 
@@ -89,37 +98,35 @@ with open(csv_file_path, "w") as csv_file:
         })
 
 #
-# RECOMMENDATION
+# STOCK PRICE GRAPH 
 # 
 
-# If a stock price is 20% less than its recent low, then buy 
-# If not, then don't buy 
+# create a dataframe of the time series data, where we have a row per day
+# write the dataframe to csv and chart it with dataframe friendly dataviz packages 
+
+from pandas import DataFrame 
+
+line_df = DataFrame(tsd)
+
+# CONVERT DATA FRAME TO CSV 
+#line_df.to_csv('tsd.csv')
+
+# READ CSV 
+
+x = pd.read_csv("tsd.csv")
+
+
+#for index, row in x.iterrows(): 
+#    print(line_df.loc[3,:])
+
+
+#ns.lineplot(data=line_df, x="date", y="stock_price_usd")
+
 
 
 #
-# LINE GRAPH OF STOCK PRICES OVER TIME 
-# This code was adapted from @joe297 on Plotly 
-
-#df = px.data.gapminder().query("country=='Canada'")
-#fig = px.line(df, x="date", y="price", title='{symbol} Stock Price')
-#fig.show()
+# RESULTS 
 #
-#import plotly.plotly as py
-#from plotly.graph_objs import *
-#
-#stock_price = {
-#  "line": {
-#    "color": "rgba(31,119,180,1)", 
-#    "fillcolor": "rgba(31,119,180,1)"
-#  }, 
-#  "mode": "lines", 
-#  "name": "{symbol}", 
-#  "type": "scatter", 
-#  "x": [ ]
-#  "y": [ ]
-#  "xaxis": "x", 
-#  "yaxis": "y"
-#}
 
 print("-------------------------")
 print(f"SELECTED SYMBOL: {symbol}")
