@@ -9,7 +9,9 @@ from dotenv import load_dotenv
 load_dotenv()
 now = datetime.now()
 import pandas as pd
+import matplotlib.pyplot as plt
 import seaborn as sns 
+
 
 def to_usd(my_price):
     return f"${my_price:,.2f}" 
@@ -106,23 +108,12 @@ with open(csv_file_path, "w") as csv_file:
 
 from pandas import DataFrame 
 
-line_df = DataFrame(tsd)
+df = pd.DataFrame(tsd)
 
-# CONVERT DATA FRAME TO CSV 
-#line_df.to_csv('tsd.csv')
+df = pd.read_csv(csv_file_path)
 
-# READ CSV 
-
-x = pd.read_csv("tsd.csv")
-
-
-#for index, row in x.iterrows(): 
-#    print(line_df.loc[3,:])
-
-
-#ns.lineplot(data=line_df, x="date", y="stock_price_usd")
-
-
+sns.lineplot(data=df[["timestamp", "close"]], x="timestamp", y="close")
+plt.show()
 
 #
 # RESULTS 
