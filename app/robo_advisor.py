@@ -12,10 +12,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns 
 
-
 def to_usd(my_price):
     return f"${my_price:,.2f}" 
-
 
 #
 # INFO INPUTS 
@@ -23,43 +21,74 @@ def to_usd(my_price):
 
 # This code was adapted from Prof Rossetti's screencast 
 
-# TODO: CAPTURE DATA IF USER INPUTS A NON VALID TICKER 
-# TODO: line graph for stock price 
-# TODO: create a reason for recomendation 
-
-
 api_key = os.environ.get("ALPHAVANTAGE_API_KEY")
 
-
 while True: 
-    symbol = input("Please input a stock or cryptocurrency ticker:")
+    symbol = input("Please input a stock ticker:")
     if symbol.isnumeric() == True: 
-        print("Oops, that's an invalid input. Please enter a properly-formed stock symbol like 'MSFT'.")
+        print("Oops, that's an invalid input. Please enter a valid stock ticker.")
     elif len(symbol) > 4: 
-        print("Oops, that's an invalid input. Please enter a properly-formed stock symbol like 'MSFT'.")
+        print("Oops, that's an invalid input. Please enter a valid stock ticker.")
     else: 
         break
-
 
 request_url = f"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol={symbol}&apikey={api_key}"
 response = requests.get(request_url)
 parsed_response = json.loads(response.text)
 
-# TODO
-#while True:
-#    if symbol not in parsed_response:
-#        print("Oops, invalid input.")
-#        break
-#    else: 
-#        break
 #
+# TODO: CAPTURING ERRORS 
+# 
+
+print(response.status_code)
+
+#while True:
+#    if response.status_code == 200:
+#        break
+#    elif response.status_code == 404: 
+#        print("Oops, that's an invalid input. Please run the program again and enter a valid stock ticker.")
+#        exit()
+#    else: 
+#        break 
+#
+# WHY DOES IT STILL RETURN 200 STATUS CODE IF YOU INPUT A STOCK SYMBOL THAT DOESN'T EXIST 
+
+#while True: 
+#    if symbol not in parsed_response: 
+#        print("Oops, that's an invalid input. Please run the program again and enter a valid stock ticker.")
+#        exit() 
+#    else: 
+#        break 
+#
+
 last_refreshed = parsed_response["Meta Data"]["3. Last Refreshed"]
 
 tsd = parsed_response["Time Series (Daily)"]
 
+dates = list(tsd.keys()) 
 
-dates = list(tsd.keys()) # TODO: sort to ensure latest day is first 
+# TODO: SORT TO ENSURE LATEST DATE IS FIRST 
 # especially if data structure changes later on. This assumes first day is on top 
+
+#dates.sort() 
+#sorteddates = [datetime.datetime.strftime(ts, "%Y-%m-%d") for ts in dates] 
+#
+#latest_day = sorteddates[0]
+#
+
+# TODO: REQUESTING FUNDAMENTAL DATA 
+# This 52 week high/low is not accurate because it's not up to date (based on the most recent day company announced earnings)
+
+request_url_fundamentals = f"https://www.alphavantage.co/query?function=OVERVIEW&symbol={symbol}&apikey={api_key}"
+response_fundamentals = requests.get(request_url_fundamentals)
+parsed_response_fundamentals = json.loads(response_fundamentals.text)
+ft_week_high = parsed_response_fundamentals["52WeekHigh"]
+ft_week_low = parsed_response_fundamentals["52WeekLow"]
+
+
+latest_day = dates[0]
+
+latest_close = tsd[latest_day]["4. close"]
 
 latest_day = dates[0]
 
@@ -81,9 +110,7 @@ recent_low = min(low_prices)
 #
 
 csv_file_path = os.path.join(os.path.dirname(__file__), "..", "data", "prices.csv")
-
 csv_headers = ["timestamp", "open", "high", "low", "close", "volume"]
-
 
 with open(csv_file_path, "w") as csv_file: 
     writer = csv.DictWriter(csv_file, fieldnames=csv_headers)
@@ -103,17 +130,17 @@ with open(csv_file_path, "w") as csv_file:
 # STOCK PRICE GRAPH 
 # 
 
-# create a dataframe of the time series data, where we have a row per day
-# write the dataframe to csv and chart it with dataframe friendly dataviz packages 
-
 from pandas import DataFrame 
-
-df = pd.DataFrame(tsd)
 
 df = pd.read_csv(csv_file_path)
 
 sns.lineplot(data=df[["timestamp", "close"]], x="timestamp", y="close")
+plt.title(f"{symbol} Price Graph")
+plt.ylabel("Stock Price")
+plt.xlabel("Time")
+
 plt.show()
+
 
 #
 # RESULTS 
@@ -127,18 +154,23 @@ print(f"REQUEST AT:", now.strftime("%Y-%m-%d %H:%M:%S"))
 print("-------------------------")
 print(f"LATEST DAY: {last_refreshed}")
 print(f"LATEST CLOSE: {to_usd(float(latest_close))}")
-print(f"RECENT HIGH: {to_usd(float(recent_high))}")
-print(f"RECENT LOW: {to_usd(float(recent_low))}")
+print(f"52-WEEK HIGH: {to_usd(float(ft_week_high))}")
+print(f"52-WEEK LOW: {to_usd(float(ft_week_low))}")
 print("-------------------------")
 
+# Change this from using 100 days recent low to 52-week high 
 
-if float(latest_close) <= 0.9*float(recent_low): 
+if float(latest_close) < 1.2*float(recent_low): 
     print("RECOMMENDATION: BUY")
+    print("The stock is trading at a discount. Now would be a great time to enter.")
+elif float(latest_close) > 1.2*float(recent_high):
+    print("RECOMMENDATION: SELL")
+    print("The stock is trading at a premium. Now would be a great time to take profits.")
 else: 
-    print("RECOMMENDATION: DON'T BUY")
+    print("RECOMMENDATION: HOLD")
+    print("The stock is fluctuating sideways. Keep holding.")
 
 
-print("RECOMMENDATION REASON: The stock is not trading at less than 10 percent of its recent low. Now's not a great time to buy.")
 print("-------------------------")
 print(f"WRITING DATA TO CSV: {csv_file_path}...")
 print("-------------------------")
