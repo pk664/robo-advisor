@@ -26,11 +26,9 @@ api_key = os.environ.get("ALPHAVANTAGE_API_KEY")
 while True: 
     symbol = input("Please input a stock ticker:")
     if symbol.isnumeric() == True: 
-        print("Oops, that's an invalid input. Please run the program again and enter a valid stock ticker.")
-        exit()
+        print("Oops, that's an invalid input. Please enter a valid stock ticker.")
     elif len(symbol) > 4: 
-        print("Oops, that's an invalid input. Please run the program again and enter a valid stock ticker.")
-        exit()
+        print("Oops, that's an invalid input. Please enter a valid stock ticker.")
     else: 
         break
 
@@ -38,13 +36,35 @@ request_url = f"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJ
 response = requests.get(request_url)
 parsed_response = json.loads(response.text)
 
-while True: 
-    if 'Error Message' in response.text:
-        print("Oops, that's an invalid input. Please run the program again and enter a valid stock ticker.")
-        exit() 
+#
+# TODO: CAPTURING ERRORS 
+# 
+
+print(response.status_code)
+
+#while True:
+#    if response.status_code == 200:
+#        break
+#    elif response.status_code == 404: 
+#        print("Oops, that's an invalid input. Please run the program again and enter a valid stock ticker.")
+#        exit()
+#    else: 
+#        break 
+#
+# WHY DOES IT STILL RETURN 200 STATUS CODE IF YOU INPUT A STOCK SYMBOL THAT DOESN'T EXIST 
+
+#while True: 
+#    if symbol not in parsed_response: 
+#        print("Oops, that's an invalid input. Please run the program again and enter a valid stock ticker.")
+#        exit() 
+#    else: 
+#        break 
+#
 
 last_refreshed = parsed_response["Meta Data"]["3. Last Refreshed"]
+
 tsd = parsed_response["Time Series (Daily)"]
+
 dates = list(tsd.keys()) 
 
 # TODO: SORT TO ENSURE LATEST DATE IS FIRST 
@@ -59,15 +79,21 @@ dates = list(tsd.keys())
 # TODO: REQUESTING FUNDAMENTAL DATA 
 # This 52 week high/low is not accurate because it's not up to date (based on the most recent day company announced earnings)
 
-#request_url_fundamentals = f"https://www.alphavantage.co/query?function=OVERVIEW&symbol={symbol}&apikey={api_key}"
-#response_fundamentals = requests.get(request_url_fundamentals)
-#parsed_response_fundamentals = json.loads(response_fundamentals.text)
-#ft_week_high = parsed_response_fundamentals["52WeekHigh"]
-#ft_week_low = parsed_response_fundamentals["52WeekLow"]
-#
+request_url_fundamentals = f"https://www.alphavantage.co/query?function=OVERVIEW&symbol={symbol}&apikey={api_key}"
+response_fundamentals = requests.get(request_url_fundamentals)
+parsed_response_fundamentals = json.loads(response_fundamentals.text)
+ft_week_high = parsed_response_fundamentals["52WeekHigh"]
+ft_week_low = parsed_response_fundamentals["52WeekLow"]
+
 
 latest_day = dates[0]
+
 latest_close = tsd[latest_day]["4. close"]
+
+latest_day = dates[0]
+
+latest_close = tsd[latest_day]["4. close"]
+
 high_prices = [ ]
 low_prices = [ ]
 
@@ -105,7 +131,9 @@ with open(csv_file_path, "w") as csv_file:
 # 
 
 from pandas import DataFrame 
+
 df = pd.read_csv(csv_file_path)
+
 sns.lineplot(data=df[["timestamp", "close"]], x="timestamp", y="close")
 plt.title(f"{symbol} Price Graph")
 plt.ylabel("Stock Price")
@@ -113,8 +141,9 @@ plt.xlabel("Time")
 
 plt.show()
 
+
 #
-# PRINTED RESULTS 
+# RESULTS 
 #
 
 print("-------------------------")
@@ -125,13 +154,8 @@ print(f"REQUEST AT:", now.strftime("%Y-%m-%d %H:%M:%S"))
 print("-------------------------")
 print(f"LATEST DAY: {last_refreshed}")
 print(f"LATEST CLOSE: {to_usd(float(latest_close))}")
-print(f"52-WEEK HIGH: {to_usd(float(recent_high))}")
-print(f"52-WEEK LOW: {to_usd(float(recent_low))}")
-print("-------------------------")
-print("-------------------------")
-print(f"WRITING DATA TO CSV: {csv_file_path}...")
-print("-------------------------")
-print("Happy Investing!")
+print(f"52-WEEK HIGH: {to_usd(float(ft_week_high))}")
+print(f"52-WEEK LOW: {to_usd(float(ft_week_low))}")
 print("-------------------------")
 
 # Change this from using 100 days recent low to 52-week high 
@@ -145,3 +169,12 @@ elif float(latest_close) > 1.2*float(recent_high):
 else: 
     print("RECOMMENDATION: HOLD")
     print("The stock is fluctuating sideways. Keep holding.")
+
+
+print("-------------------------")
+print(f"WRITING DATA TO CSV: {csv_file_path}...")
+print("-------------------------")
+print("Happy Investing!")
+print("-------------------------")
+
+
