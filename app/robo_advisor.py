@@ -45,20 +45,12 @@ last_refreshed = parsed_response["Meta Data"]["3. Last Refreshed"]
 tsd = parsed_response["Time Series (Daily)"]
 dates = list(tsd.keys()) 
 
-# TODO: SORT TO ENSURE LATEST DATE IS FIRST 
-# especially if data structure changes later on. This assumes first day is on top 
-
-#dates.sort() 
-#sorteddates = [datetime.datetime.strftime(ts, "%Y-%m-%d") for ts in dates] 
-
-#
-#latest_day = sorteddates[0]
-#
-
 # TODO: 52-WEEK HIGHS AND LOWS 
 #request_url_monthly = f"https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&{symbol}=IBM&apikey={api_key}"
 #response_monthly = requests.get(request_url_monthly)
 #parsed_response_monthly = json.loads(response_monthly.text)
+#
+#ft_weeks = parsed_response_monthly["Monthly Time Series"
 
 #ft_week_high = parsed_response_monthly["52WeekHigh"]
 #ft_week_low = parsed_response_monthly["52WeekLow"]
@@ -72,7 +64,15 @@ industry = parsed_response_fundamentals["Industry"]
 forward_pe = parsed_response_fundamentals["ForwardPE"]
 analyst_target = parsed_response_fundamentals["AnalystTargetPrice"]
 
-# OTHER STUFF 
+# TODO: SORT TO ENSURE LATEST DATE IS FIRST 
+# especially if data structure changes later on. This assumes first day is on top 
+
+#dates.sort() 
+#sorteddates = [datetime.datetime.strftime(ts, "%Y-%m-%d") for ts in dates] 
+
+#
+#latest_day = sorteddates[0]
+#
 
 latest_day = dates[0]
 latest_close = tsd[latest_day]["4. close"]
@@ -125,8 +125,17 @@ print(f"LATEST CLOSE: {to_usd(float(latest_close))}")
 print(f"52-WEEK HIGH: {to_usd(float(recent_high))}")
 print(f"52-WEEK LOW: {to_usd(float(recent_low))}")
 print("-------------------------")
+print("MOST RECENT 10-Q FUNDAMENTAL DATA:")
 print(f"FORWARD P/E RATIO: {forward_pe}")
 print(f"ANALYST PRICE TARGET: {analyst_target}")
+percent = ((float(latest_close) - float(analyst_target))/(float(analyst_target)))*100
+if float(analyst_target) > float(latest_close):
+    print(f"The current stock price is {percent}% lower than its analyst price target.")
+else: 
+    print(f"The current stock price is {percent}% higher than its analyst price target."))
+
+
+print(f"The current stock price differs from the analyst price target by {percent}.")
 
 # Change this from using 100 days recent low to 52-week high 
 
