@@ -26,9 +26,11 @@ api_key = os.environ.get("ALPHAVANTAGE_API_KEY")
 while True: 
     symbol = input("Please input a stock ticker:")
     if symbol.isnumeric() == True: 
-        print("Oops, that's an invalid input. Please enter a valid stock ticker.")
+        print("Oops, that's an invalid input. Please run the program again and enter a valid stock ticker.")
+        exit()
     elif len(symbol) > 4: 
-        print("Oops, that's an invalid input. Please enter a valid stock ticker.")
+        print("Oops, that's an invalid input. Please run the program again and enter a valid stock ticker.")
+        exit()
     else: 
         break
 
@@ -36,35 +38,15 @@ request_url = f"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJ
 response = requests.get(request_url)
 parsed_response = json.loads(response.text)
 
-#
-# TODO: CAPTURING ERRORS 
-# 
-
-print(response.status_code)
-
-#while True:
-#    if response.status_code == 200:
-#        break
-#    elif response.status_code == 404: 
-#        print("Oops, that's an invalid input. Please run the program again and enter a valid stock ticker.")
-#        exit()
-#    else: 
-#        break 
-#
-# WHY DOES IT STILL RETURN 200 STATUS CODE IF YOU INPUT A STOCK SYMBOL THAT DOESN'T EXIST 
-
-#while True: 
-#    if symbol not in parsed_response: 
-#        print("Oops, that's an invalid input. Please run the program again and enter a valid stock ticker.")
-#        exit() 
-#    else: 
-#        break 
-#
+while True: 
+    if "Error Message" in response.text: 
+        print("Oops, that's an invalid input. Please run the program again and enter a valid stock ticker.")
+        exit()
+    else: 
+        break 
 
 last_refreshed = parsed_response["Meta Data"]["3. Last Refreshed"]
-
 tsd = parsed_response["Time Series (Daily)"]
-
 dates = list(tsd.keys()) 
 
 # TODO: SORT TO ENSURE LATEST DATE IS FIRST 
