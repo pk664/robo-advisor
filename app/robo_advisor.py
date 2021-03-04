@@ -11,15 +11,11 @@ now = datetime.now()
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns 
-
 def to_usd(my_price):
     return f"${my_price:,.2f}" 
 
-#
-# INFO INPUTS 
-#
-
 # This code was adapted from Prof Rossetti's screencast 
+# TODO: how to make displayed symbols be capital letters
 
 api_key = os.environ.get("ALPHAVANTAGE_API_KEY")
 
@@ -54,26 +50,31 @@ dates = list(tsd.keys())
 
 #dates.sort() 
 #sorteddates = [datetime.datetime.strftime(ts, "%Y-%m-%d") for ts in dates] 
+
 #
 #latest_day = sorteddates[0]
 #
 
-# TODO: REQUESTING FUNDAMENTAL DATA 
-# This 52 week high/low is not accurate because it's not up to date (based on the most recent day company announced earnings)
+# TODO: 52-WEEK HIGHS AND LOWS 
+#request_url_monthly = f"https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&{symbol}=IBM&apikey={api_key}"
+#response_monthly = requests.get(request_url_monthly)
+#parsed_response_monthly = json.loads(response_monthly.text)
 
+#ft_week_high = parsed_response_monthly["52WeekHigh"]
+#ft_week_low = parsed_response_monthly["52WeekLow"]
+
+# TODO: REQUESTING FUNDAMENTAL DATA 
 request_url_fundamentals = f"https://www.alphavantage.co/query?function=OVERVIEW&symbol={symbol}&apikey={api_key}"
 response_fundamentals = requests.get(request_url_fundamentals)
 parsed_response_fundamentals = json.loads(response_fundamentals.text)
-ft_week_high = parsed_response_fundamentals["52WeekHigh"]
-ft_week_low = parsed_response_fundamentals["52WeekLow"]
 
+industry = parsed_response_fundamentals["Industry"]
+forward_pe = parsed_response_fundamentals["ForwardPE"]
+analyst_target = parsed_response_fundamentals["AnalystTargetPrice"]
+
+# OTHER STUFF 
 
 latest_day = dates[0]
-
-latest_close = tsd[latest_day]["4. close"]
-
-latest_day = dates[0]
-
 latest_close = tsd[latest_day]["4. close"]
 
 high_prices = [ ]
@@ -109,22 +110,6 @@ with open(csv_file_path, "w") as csv_file:
         })
 
 #
-# STOCK PRICE GRAPH 
-# 
-
-from pandas import DataFrame 
-
-df = pd.read_csv(csv_file_path)
-
-sns.lineplot(data=df[["timestamp", "close"]], x="timestamp", y="close")
-plt.title(f"{symbol} Price Graph")
-plt.ylabel("Stock Price")
-plt.xlabel("Time")
-
-plt.show()
-
-
-#
 # RESULTS 
 #
 
@@ -134,11 +119,14 @@ print("-------------------------")
 print("REQUESTING STOCK MARKET DATA...")
 print(f"REQUEST AT:", now.strftime("%Y-%m-%d %H:%M:%S"))
 print("-------------------------")
+print(f"INDUSTRY: {industry}")
 print(f"LATEST DAY: {last_refreshed}")
 print(f"LATEST CLOSE: {to_usd(float(latest_close))}")
-print(f"52-WEEK HIGH: {to_usd(float(ft_week_high))}")
-print(f"52-WEEK LOW: {to_usd(float(ft_week_low))}")
+print(f"52-WEEK HIGH: {to_usd(float(recent_high))}")
+print(f"52-WEEK LOW: {to_usd(float(recent_low))}")
 print("-------------------------")
+print(f"FORWARD P/E RATIO: {forward_pe}")
+print(f"ANALYST PRICE TARGET: {analyst_target}")
 
 # Change this from using 100 days recent low to 52-week high 
 
@@ -158,5 +146,19 @@ print(f"WRITING DATA TO CSV: {csv_file_path}...")
 print("-------------------------")
 print("Happy Investing!")
 print("-------------------------")
+
+#
+# STOCK PRICE GRAPH 
+# 
+
+from pandas import DataFrame 
+df = pd.read_csv(csv_file_path)
+
+sns.lineplot(data=df[["timestamp", "close"]], x="timestamp", y="close")
+plt.title(f"{symbol} Price Graph")
+plt.ylabel("Stock Price")
+plt.xlabel("Time")
+plt.show()
+
 
 
