@@ -1,6 +1,6 @@
 # robo-advisor
 
-A Python application that atuomates the process of providing clients with stock trading recommendations. The system provides three types of recommendations to the client: BUY, HOLD, or SELL. These recommendations are based on the following criteria. 
+A Python application that atuomates the process of providing clients with stock trading recommendations. The system provides three types of recommendations to the client: BUY, HOLD, or SELL. The system also provides insight on the stock's most recent quarterly fundamental data. 
 
 # Prerequisites 
 
@@ -48,4 +48,27 @@ Run the game script by executing the following command:
 python app/robo_advisor.py
 
 > NOTE: if you see an error like "ModuleNotFoundError: No module named '...'", 
-it's because the given package isn't installed, so run the `pip` command above to ensure that package has been installed into the virtual environment. 
+it's because the given package isn't installed, so run the `pip` command above to ensure that package has been installed into the virtual environment.
+
+## Recommendation Criteria 
+
+If the stock is trading at a 20% premium compared to its most recent high, then the stock will be regarded a SELL. 
+
+If the stock is trading at a 20% discount compared to its most recent low, then the stock will be regarded a BUY. 
+
+If the stock is flutuating in between the range between 20% from its most recent low to 20% from its most recent high, then the stock will be regarded a HOLD. 
+
+## Robo Advisor Insights Guidelines 
+
+The following definitions of financial metrics are adapted from Investopedia. 
+
+Fundamental data provided by the Robo Advisor application include: forward price to earnings ratio, beta, price to book ratio, enterprise value to revenue, enterprise value to EBITDA, and dividend yield. 
+
++ Forward P/E ratio indicates the market value of a stock compared to the companies future earnings. 
++ Beta indicates how volatile a stock's price is compared to the overall stock market. 
++ Price to Book ratio compares the company's market value to its book value, which represents the net assets of a company. 
++ Enterprise Value to Revenue measures how much it would cost to purchase a company's value in terms of its revenue. 
++ Enterprsie Value to EBITDA measures how much it would cost to purchase a company's value in terms of its earnings before interest, taxes, depreciation, and amortization. 
++ Dividend Yield indicates how much a company pays out in dividends each year relative to its stock price. 
+
+

@@ -16,9 +16,8 @@ def to_usd(my_price):
 
 # This code was adapted from Prof Rossetti's screencast 
 
-# TODO: how to make displayed symbols be capital letters (esp for the inputted if not capitalized)
-# TODO: make decimals that are shown rounded to two decimal places 
 
+# TODO: make decimals that are shown rounded to two decimal places 
 
 api_key = os.environ.get("ALPHAVANTAGE_API_KEY")
 
@@ -49,21 +48,7 @@ tsd = parsed_response["Time Series (Daily)"]
 dates = list(tsd.keys()) 
 dates.sort()
 
-
-# TODO: 52-WEEK HIGHS AND LOWS 
-#request_url_monthly = f"https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&{symbol}=IBM&apikey={api_key}"
-#response_monthly = requests.get(request_url_monthly)
-#parsed_response_monthly = json.loads(response_monthly.text)
-#
-#ft_weeks = parsed_response_monthly["Monthly Time Series"]
-
-#ft_week_high = parsed_response_monthly["52WeekHigh"]
-#ft_week_low = parsed_response_monthly["52WeekLow"]
-
-#
 # REQUESTING FUNDAMENTAL DATA 
-#
-
 request_url_fundamentals = f"https://www.alphavantage.co/query?function=OVERVIEW&symbol={symbol}&apikey={api_key}"
 response_fundamentals = requests.get(request_url_fundamentals)
 parsed_response_fundamentals = json.loads(response_fundamentals.text)
@@ -75,7 +60,6 @@ price_to_book_ratio = parsed_response_fundamentals["PriceToBookRatio"]
 ev_to_revenue = parsed_response_fundamentals["EVToRevenue"]
 ev_to_ebitda = parsed_response_fundamentals["EVToEBITDA"]
 dividend_yield = parsed_response_fundamentals["DividendYield"]
-
 
 latest_day = dates[0]
 latest_close = tsd[latest_day]["4. close"]
@@ -91,10 +75,7 @@ for date in dates:
 recent_high = max(high_prices)
 recent_low = min(low_prices)
 
-#
 # INFO OUTPUTS 
-#
-
 csv_file_path = os.path.join(os.path.dirname(__file__), "..", "data", "prices.csv")
 csv_headers = ["timestamp", "open", "high", "low", "close", "volume"]
 
@@ -112,11 +93,8 @@ with open(csv_file_path, "w") as csv_file:
             "volume": daily_prices["6. volume"]
         })
 
-#
+
 # RESULTS 
-#
-
-
 print("-------------------------")
 print(f"SELECTED SYMBOL: {symbol}")
 print(f"REQUESTING STOCK MARKET DATA AT:", now.strftime("%Y-%m-%d %H:%M:%S"))
@@ -124,8 +102,8 @@ print("-------------------------")
 print(f"INDUSTRY: {industry}")
 print(f"LATEST DAY: {last_refreshed}")
 print(f"LATEST CLOSING PRICE: {to_usd(float(latest_close))}")
-print(f"52-WEEK HIGH: {to_usd(float(recent_high))}")
-print(f"52-WEEK LOW: {to_usd(float(recent_low))}")
+print(f"RECENT HIGH: {to_usd(float(recent_high))}")
+print(f"RECENT LOW: {to_usd(float(recent_low))}")
 print("-------------------------")
 print("RECENT QUARTERLY FUNDAMENTAL DATA:")
 print(f"FORWARD P/E RATIO: {forward_pe}")
@@ -180,14 +158,16 @@ while True:
         print("This stock has an above average dividend yield compared to the average S&P 500 yield.")
         break
 print()
-if float(latest_close) < 1.2*float(recent_low): 
-    print("RECOMMENDATION: BUY")
+
+# BUY HOLD OR SELL 
+if float(latest_close) < 0.8*float(recent_low): 
+    print("Recommendation: BUY")
     print("The stock is trading at a discount. Now would be a great time to enter.")
 elif float(latest_close) > 1.2*float(recent_high):
-    print("RECOMMENDATION: SELL")
+    print("Recommendation: SELL")
     print("The stock is trading at a premium. Now would be a great time to take profits.")
 else: 
-    print("RECOMMENDATION: HOLD")
+    print("Recommendation: HOLD")
     print("The stock is fluctuating sideways. Keep holding.")
 
 
@@ -197,17 +177,12 @@ print("-------------------------")
 print("Happy Investing!")
 print("-------------------------")
 
-#
 # STOCK PRICE GRAPH 
-# 
-
 from pandas import DataFrame 
 
 # This code is attributed from Bryan Zhou 
 df = pd.read_csv(csv_file_path)
 
-
-# SORT DATE (ORDER OF DATE ON THE AXIS IS WRONG IT GOES FROM 2021 --> 2020)
 sns.lineplot(data=df[["timestamp", "close"]], x="timestamp", y="close")
 plt.title(f"{symbol} Price Graph")
 plt.ylabel("Stock Price")
