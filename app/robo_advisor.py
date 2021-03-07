@@ -15,7 +15,10 @@ def to_usd(my_price):
     return f"${my_price:,.2f}" 
 
 # This code was adapted from Prof Rossetti's screencast 
-# TODO: how to make displayed symbols be capital letters
+
+# TODO: how to make displayed symbols be capital letters (esp for the inputted if not capitalized)
+# TODO: make decimals that are shown rounded to two decimal places 
+
 
 api_key = os.environ.get("ALPHAVANTAGE_API_KEY")
 
@@ -44,35 +47,35 @@ while True:
 last_refreshed = parsed_response["Meta Data"]["3. Last Refreshed"]
 tsd = parsed_response["Time Series (Daily)"]
 dates = list(tsd.keys()) 
+dates.sort()
+
 
 # TODO: 52-WEEK HIGHS AND LOWS 
 #request_url_monthly = f"https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&{symbol}=IBM&apikey={api_key}"
 #response_monthly = requests.get(request_url_monthly)
 #parsed_response_monthly = json.loads(response_monthly.text)
 #
-#ft_weeks = parsed_response_monthly["Monthly Time Series"
+#ft_weeks = parsed_response_monthly["Monthly Time Series"]
 
 #ft_week_high = parsed_response_monthly["52WeekHigh"]
 #ft_week_low = parsed_response_monthly["52WeekLow"]
 
-# TODO: REQUESTING FUNDAMENTAL DATA 
+#
+# REQUESTING FUNDAMENTAL DATA 
+#
+
 request_url_fundamentals = f"https://www.alphavantage.co/query?function=OVERVIEW&symbol={symbol}&apikey={api_key}"
 response_fundamentals = requests.get(request_url_fundamentals)
 parsed_response_fundamentals = json.loads(response_fundamentals.text)
 
 industry = parsed_response_fundamentals["Industry"]
 forward_pe = parsed_response_fundamentals["ForwardPE"]
-analyst_target = parsed_response_fundamentals["AnalystTargetPrice"]
+beta = parsed_response_fundamentals["Beta"]
+price_to_book_ratio = parsed_response_fundamentals["PriceToBookRatio"]
+ev_to_revenue = parsed_response_fundamentals["EVToRevenue"]
+ev_to_ebitda = parsed_response_fundamentals["EVToEBITDA"]
+dividend_yield = parsed_response_fundamentals["DividendYield"]
 
-# TODO: SORT TO ENSURE LATEST DATE IS FIRST 
-# especially if data structure changes later on. This assumes first day is on top 
-
-#dates.sort() 
-#sorteddates = [datetime.datetime.strftime(ts, "%Y-%m-%d") for ts in dates] 
-
-#
-#latest_day = sorteddates[0]
-#
 
 latest_day = dates[0]
 latest_close = tsd[latest_day]["4. close"]
@@ -113,32 +116,70 @@ with open(csv_file_path, "w") as csv_file:
 # RESULTS 
 #
 
+
 print("-------------------------")
 print(f"SELECTED SYMBOL: {symbol}")
-print("-------------------------")
-print("REQUESTING STOCK MARKET DATA...")
-print(f"REQUEST AT:", now.strftime("%Y-%m-%d %H:%M:%S"))
+print(f"REQUESTING STOCK MARKET DATA AT:", now.strftime("%Y-%m-%d %H:%M:%S"))
 print("-------------------------")
 print(f"INDUSTRY: {industry}")
 print(f"LATEST DAY: {last_refreshed}")
-print(f"LATEST CLOSE: {to_usd(float(latest_close))}")
+print(f"LATEST CLOSING PRICE: {to_usd(float(latest_close))}")
 print(f"52-WEEK HIGH: {to_usd(float(recent_high))}")
 print(f"52-WEEK LOW: {to_usd(float(recent_low))}")
 print("-------------------------")
-print("MOST RECENT 10-Q FUNDAMENTAL DATA:")
+print("RECENT QUARTERLY FUNDAMENTAL DATA:")
 print(f"FORWARD P/E RATIO: {forward_pe}")
-print(f"ANALYST PRICE TARGET: {analyst_target}")
-percent = ((float(latest_close) - float(analyst_target))/(float(analyst_target)))*100
-if float(analyst_target) > float(latest_close):
-    print(f"The current stock price is {percent}% lower than its analyst price target.")
-else: 
-    print(f"The current stock price is {percent}% higher than its analyst price target."))
+while True: 
+    if beta == str('None'): 
+        break
+    else: 
+        print(f"BETA: {beta}")
+        break 
+print(f"PRICE TO BOOK RATIO: {price_to_book_ratio}")
+print(f"EV/REVENUE: {ev_to_revenue}")
+print(f"EV/EBITDA: {ev_to_ebitda}") 
+while True: 
+    if dividend_yield == str('None'): 
+        break 
+    else:
+        dividend_yield_percentage = float(dividend_yield)*100
+        print(f"DIVIDEND YIELD: {dividend_yield_percentage}%")
+        break 
+print("-------------------------")
+print("ROBO ADVISOR INSIGHTS")
 
+# BETA CRITERIA 
+while True: 
+    if beta == str('None'):
+        break 
+    elif 0 < float(beta) < 1: 
+        print("This stock is less volatile than the market.") 
+        break
+    elif float(beta) > 1:  
+        print("This stock is more volatile than the market.")
+        break
+    elif float(beta) < 0: 
+        print("This stock has an inverse relation to the market.")
+        break
+    else: 
+        print("This stock mirrors the volatility of the market.")
+        break
 
-print(f"The current stock price differs from the analyst price target by {percent}.")
-
-# Change this from using 100 days recent low to 52-week high 
-
+# DIVIDEND YIELD CRITERIA
+while True: 
+    if dividend_yield == str('None'):
+        print("This stock does not pay out dividends to its shareholders.")
+        break 
+    elif 0 < float(dividend_yield_percentage) < 1:
+        print("This stock has a relatively low dividend yield compared to the average S&P 500 yield. ") 
+        break
+    elif 1 < float(dividend_yield_percentage) < 2.5:
+        print("This stock has a dividend yield similar to the average S&P 500 yield.") 
+        break
+    elif 2.5 < float(dividend_yield_percentage):
+        print("This stock has an above average dividend yield compared to the average S&P 500 yield.")
+        break
+print()
 if float(latest_close) < 1.2*float(recent_low): 
     print("RECOMMENDATION: BUY")
     print("The stock is trading at a discount. Now would be a great time to enter.")
@@ -161,8 +202,12 @@ print("-------------------------")
 # 
 
 from pandas import DataFrame 
+
+# This code is attributed from Bryan Zhou 
 df = pd.read_csv(csv_file_path)
 
+
+# SORT DATE (ORDER OF DATE ON THE AXIS IS WRONG IT GOES FROM 2021 --> 2020)
 sns.lineplot(data=df[["timestamp", "close"]], x="timestamp", y="close")
 plt.title(f"{symbol} Price Graph")
 plt.ylabel("Stock Price")
