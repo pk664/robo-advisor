@@ -39,18 +39,7 @@ In in the root directory of your local repository, create a new file called ".en
 
     ALPHAVANTAGE_API_KEY="abc123"
 
-
-## Usage
-
-Run the game script by executing the following command: 
-
-```py
-python app/robo_advisor.py
-
-> NOTE: if you see an error like "ModuleNotFoundError: No module named '...'", 
-it's because the given package isn't installed, so run the `pip` command above to ensure that package has been installed into the virtual environment.
-
-## Recommendation Criteria 
+## Recommendation Crtieria 
 
 If the stock is trading at a 20% premium compared to its most recent high, then the stock will be regarded a SELL. 
 
@@ -58,7 +47,7 @@ If the stock is trading at a 20% discount compared to its most recent low, then 
 
 If the stock is flutuating in between the range between 20% from its most recent low to 20% from its most recent high, then the stock will be regarded a HOLD. 
 
-## Robo Advisor Insights Guidelines 
+## Robo Advisor Insights Explained 
 
 The following definitions of financial metrics are adapted from Investopedia. 
 
@@ -70,5 +59,17 @@ Fundamental data provided by the Robo Advisor application include: forward price
 + Enterprise Value to Revenue measures how much it would cost to purchase a company's value in terms of its revenue. 
 + Enterprsie Value to EBITDA measures how much it would cost to purchase a company's value in terms of its earnings before interest, taxes, depreciation, and amortization. 
 + Dividend Yield indicates how much a company pays out in dividends each year relative to its stock price. 
+
+## Usage 
+
+Run the Robo Advisor application by executing the following command below. Happy Investing! 
+
+> NOTE: if you see an error like "ModuleNotFoundError: No module named '...'", 
+it's because the given package isn't installed, so run the `pip` command above to ensure that package has been installed into the virtual environment.
+
+```py
+python app/robo_advisor.py
+
+
 
 
