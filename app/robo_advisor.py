@@ -16,9 +16,6 @@ def to_usd(my_price):
 
 # This code was adapted from Prof Rossetti's screencast 
 
-
-# TODO: make decimals that are shown rounded to two decimal places 
-
 api_key = os.environ.get("ALPHAVANTAGE_API_KEY")
 
 while True: 
@@ -26,12 +23,13 @@ while True:
     if symbol.isnumeric() == True: 
         print("Oops, that's an invalid input. Please run the program again and enter a valid stock ticker.")
         exit()
-    elif len(symbol) > 4: 
+    elif len(symbol) > 5: 
         print("Oops, that's an invalid input. Please run the program again and enter a valid stock ticker.")
         exit()
     else: 
         break
 
+# REQUESTING TIME SERIES DAILY DATA 
 request_url = f"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol={symbol}&apikey={api_key}"
 response = requests.get(request_url)
 parsed_response = json.loads(response.text)
@@ -61,7 +59,8 @@ ev_to_revenue = parsed_response_fundamentals["EVToRevenue"]
 ev_to_ebitda = parsed_response_fundamentals["EVToEBITDA"]
 dividend_yield = parsed_response_fundamentals["DividendYield"]
 
-latest_day = dates[0]
+# SORTING DATES 
+latest_day = dates[-1]
 latest_close = tsd[latest_day]["4. close"]
 
 high_prices = [ ]
@@ -126,61 +125,30 @@ while True:
 print("-------------------------")
 print("ROBO ADVISOR INSIGHTS")
 
-# BETA CRITERIA 
-while True: 
-    if beta == str('None'):
-        break 
-    elif 0 < float(beta) < 1: 
-        print("This stock is less volatile than the market.") 
-        break
-    elif float(beta) > 1:  
-        print("This stock is more volatile than the market.")
-        break
-    elif float(beta) < 0: 
-        print("This stock has an inverse relation to the market.")
-        break
-    else: 
-        print("This stock mirrors the volatility of the market.")
-        break
-
-# DIVIDEND YIELD CRITERIA
-while True: 
-    if dividend_yield == str('None'):
-        print("This stock does not pay out dividends to its shareholders.")
-        break 
-    elif 0 < float(dividend_yield_percentage) < 1:
-        print("This stock has a relatively low dividend yield compared to the average S&P 500 yield. ") 
-        break
-    elif 1 < float(dividend_yield_percentage) < 2.5:
-        print("This stock has a dividend yield similar to the average S&P 500 yield.") 
-        break
-    elif 2.5 < float(dividend_yield_percentage):
-        print("This stock has an above average dividend yield compared to the average S&P 500 yield.")
-        break
-print()
-
 # BUY HOLD OR SELL 
 if float(latest_close) < 0.8*float(recent_low): 
     print("Recommendation: BUY")
-    print("The stock is trading at a discount. Now would be a great time to enter.")
+    print(f"The stock is trading at a 20% discount compared to its 100-day recent low.")
+    print("Now would be a great time to enter.")
 elif float(latest_close) > 1.2*float(recent_high):
     print("Recommendation: SELL")
-    print("The stock is trading at a premium. Now would be a great time to take profits.")
+    print("The stock is trading at a 20% premium compared to its 100-day recent high.")
+    print("Now would be a great time to take profits.")
 else: 
     print("Recommendation: HOLD")
-    print("The stock is fluctuating sideways. Keep holding.")
+    print("The stock is fluctuating sideways.")
+    print("It has not broken recent highs nor recent lows.")
+    print("Now would be a great time to keep holding the stock.")
 
 
 print("-------------------------")
 print(f"WRITING DATA TO CSV: {csv_file_path}...")
-print("-------------------------")
 print("Happy Investing!")
-print("-------------------------")
 
 # STOCK PRICE GRAPH 
 from pandas import DataFrame 
 
-# This code is attributed from Bryan Zhou 
+# Bryan Zhou helped me with this line of code 
 df = pd.read_csv(csv_file_path)
 
 sns.lineplot(data=df[["timestamp", "close"]], x="timestamp", y="close")
@@ -188,6 +156,4 @@ plt.title(f"{symbol} Price Graph")
 plt.ylabel("Stock Price")
 plt.xlabel("Time")
 plt.show()
-
-
 

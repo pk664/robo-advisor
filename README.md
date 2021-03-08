@@ -1,6 +1,6 @@
 # robo-advisor
 
-A Python application that atuomates the process of providing clients with stock trading recommendations. The system provides three types of recommendations to the client: BUY, HOLD, or SELL. The system also provides insight on the stock's most recent quarterly fundamental data. 
+A Python application that atuomates the process of providing clients with stock trading recommendations. The system provides three types of recommendations to the client: BUY, HOLD, or SELL. The system also provides insight on the stock's most recent quarterly fundamental data as well as a stock price chart. 
 
 # Prerequisites 
 
@@ -39,11 +39,11 @@ In in the root directory of your local repository, create a new file called ".en
 
     ALPHAVANTAGE_API_KEY="abc123"
 
-## Recommendation Crtieria 
+## Recommendation Criteria 
 
-If the stock is trading at a 20% premium compared to its most recent high, then the stock will be regarded a SELL. 
+If the stock is trading at a 20% premium compared to its most recent high, then the stock will be regarded a SELL. This would be a great time for users to take profits. 
 
-If the stock is trading at a 20% discount compared to its most recent low, then the stock will be regarded a BUY. 
+If the stock is trading at a 20% discount compared to its most recent low, then the stock will be regarded a BUY. This would be a great time for users to buy in. 
 
 If the stock is flutuating in between the range between 20% from its most recent low to 20% from its most recent high, then the stock will be regarded a HOLD. 
 
@@ -51,7 +51,7 @@ If the stock is flutuating in between the range between 20% from its most recent
 
 The following definitions of financial metrics are adapted from Investopedia. 
 
-Fundamental data provided by the Robo Advisor application include: forward price to earnings ratio, beta, price to book ratio, enterprise value to revenue, enterprise value to EBITDA, and dividend yield. 
+Fundamental data provided by the Robo Advisor application include: forward price to earnings ratio, beta, price to book ratio, enterprise value to revenue, enterprise value to EBITDA, and dividend yield. These financial metrics are intended to help inform the user with additional information regarding their stock of interest. 
 
 + Forward P/E ratio indicates the market value of a stock compared to the companies future earnings. 
 + Beta indicates how volatile a stock's price is compared to the overall stock market. 
