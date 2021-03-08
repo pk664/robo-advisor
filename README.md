@@ -1,6 +1,6 @@
 # robo-advisor
 
-A Python application that atuomates the process of providing clients with stock trading recommendations. The system provides three types of recommendations to the client: BUY, HOLD, or SELL. The system also provides insight on the stock's most recent quarterly fundamental data as well as a stock price chart. 
+A Python application that automates the process of providing clients with stock trading recommendations. The system provides three types of recommendations to the client: BUY, HOLD, or SELL. The system also provides insight on the stock's most recent quarterly fundamental data as well as a stock price chart. 
 
 # Prerequisites 
 
